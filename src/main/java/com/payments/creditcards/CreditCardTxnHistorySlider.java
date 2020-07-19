@@ -19,19 +19,7 @@ public abstract class CreditCardTxnHistorySlider implements CreditCardTxnHistory
     return getCreditCardTotalSpentInSlidingWindow() + amount;
   }
 
-  public void updateCreditCardSlidingWindow(CreditCardTxn startTxn, CreditCardTxn newTxn) {
+  public abstract void updateCreditCardSlidingWindow(CreditCardTxn startTxn, CreditCardTxn newTxn)
+      throws Exception;
 
-    // First transaction in card
-    if (isNewCreditCard()) {
-      startCreditCardSlidingWindowIndex++;
-
-    } else if (!isRangeInSlidingWindow(startTxn.getCCTimestamp(), newTxn.getCCTimestamp())) {
-      // If new transaction moves the sliding window, update the start index and deduct the amount
-      creditCardTotalSpentInSlidingWindow -= startTxn.getCCAmountSpent();
-      startCreditCardSlidingWindowIndex++;
-    }
-
-    // New transaction amount is included in the Sliding Window
-    creditCardTotalSpentInSlidingWindow += newTxn.getCCAmountSpent();
-  }
 }
