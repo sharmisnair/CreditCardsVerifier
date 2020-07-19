@@ -88,7 +88,7 @@ public class CreditCardsProcessorTest {
     processor.processCreditCardTxn(hash, timestamp2, amount2);
 
     assertThat(processor.getFraudulentCreditCardsHashList().isEmpty()).isEqualTo(true);
-    assertThat(processor.getCreditCardsHashSet().size()).isEqualTo(1);
+    assertThat(processor.getTotalCreditCardsNum()).isEqualTo(1);
   }
 
   @Test
@@ -110,7 +110,7 @@ public class CreditCardsProcessorTest {
     processor.processCreditCardTxn(hash, timestamp2, amount2);
 
     assertThat(processor.getFraudulentCreditCardsHashList().isEmpty()).isEqualTo(true);
-    assertThat(processor.getCreditCardsHashSet().size()).isEqualTo(1);
+    assertThat(processor.getTotalCreditCardsNum()).isEqualTo(1);
   }
 
   @Test
@@ -132,7 +132,7 @@ public class CreditCardsProcessorTest {
     processor.processCreditCardTxn(hash, timestamp2, amount2);
 
     assertThat(processor.getFraudulentCreditCardsHashList().isEmpty()).isEqualTo(false);
-    assertThat(processor.getCreditCardsHashSet().size()).isEqualTo(1);
+    assertThat(processor.getTotalCreditCardsNum()).isEqualTo(1);
     assertThat(processor.getFraudulentCreditCardsHashList().contains(hash)).isEqualTo(true);
   }
 
@@ -155,7 +155,7 @@ public class CreditCardsProcessorTest {
     processor.processCreditCardTxn(hash, timestamp2, amount2);
 
     assertThat(processor.getFraudulentCreditCardsHashList().isEmpty()).isEqualTo(false);
-    assertThat(processor.getCreditCardsHashSet().size()).isEqualTo(1);
+    assertThat(processor.getTotalCreditCardsNum()).isEqualTo(1);
     assertThat(processor.getFraudulentCreditCardsHashList().contains(hash)).isEqualTo(true);
   }
 
@@ -178,7 +178,7 @@ public class CreditCardsProcessorTest {
     processor.processCreditCardTxn(hash2, timestamp2, amount2);
 
     assertThat(processor.getFraudulentCreditCardsHashList().isEmpty()).isEqualTo(false);
-    assertThat(processor.getCreditCardsHashSet().size()).isEqualTo(2);
+    assertThat(processor.getTotalCreditCardsNum()).isEqualTo(2);
     assertThat(processor.getFraudulentCreditCardsHashList().contains(hash1)).isEqualTo(true);
     assertThat(processor.getFraudulentCreditCardsHashList().contains(hash2)).isEqualTo(true);
   }
@@ -201,7 +201,7 @@ public class CreditCardsProcessorTest {
     processor.processCreditCardTxn(hash, timestamp2, amount2);
 
     assertThat(processor.getFraudulentCreditCardsHashList().isEmpty()).isEqualTo(false);
-    assertThat(processor.getCreditCardsHashSet().size()).isEqualTo(1);
+    assertThat(processor.getTotalCreditCardsNum()).isEqualTo(1);
     assertThat(processor.getFraudulentCreditCardsHashList().contains(hash)).isEqualTo(true);
   }
 

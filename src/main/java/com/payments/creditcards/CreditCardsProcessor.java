@@ -17,7 +17,6 @@ public class CreditCardsProcessor implements CsvProcessor {
   private final Double creditCardThreshold;
 
   private HashMap<String, CreditCard> creditCardsMap;
-  private Set<String> creditCardsHashSet;
 
   private List<String> fraudulentCreditCardsHashList;
 
@@ -25,16 +24,13 @@ public class CreditCardsProcessor implements CsvProcessor {
 
     creditCardThreshold = threshold;
     creditCardsMap = new HashMap<String, CreditCard>();
-    creditCardsHashSet = new HashSet<String>();
     fraudulentCreditCardsHashList = new ArrayList<String>();
   }
 
+  public Integer getTotalCreditCardsNum() { return creditCardsMap.size(); }
+
   public List<String> getFraudulentCreditCardsHashList() {
     return fraudulentCreditCardsHashList;
-  }
-
-  public Set<String> getCreditCardsHashSet() {
-    return creditCardsHashSet;
   }
 
   public void processCreditCardTxnAllString(String creditCardTxnString, String delimiter) {
@@ -92,7 +88,7 @@ public class CreditCardsProcessor implements CsvProcessor {
     try {
 
       // Check if we know this credit card already
-      if (creditCardsHashSet.contains(hash)) {
+      if (creditCardsMap.containsKey(hash)) {
         creditCard = creditCardsMap.get(hash);
 
       } else {
@@ -111,7 +107,6 @@ public class CreditCardsProcessor implements CsvProcessor {
 
   public void updateProcessorNewCreditCard(CreditCard creditCard) {
     String hash = creditCard.getCCHash();
-    creditCardsHashSet.add(hash);
     creditCardsMap.put(hash, creditCard);
   }
 
