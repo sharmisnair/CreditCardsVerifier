@@ -46,7 +46,7 @@ Two arguments are passed to the com.payments.Main program:
 
 This involves storing transactions per credit card and tracking the window of transactions that are within the 24 hour window.
 
-* *creditCardTotalSpentInSlidingWindow *: The total sum of all transaction amounts for the given credit card in the past 24 hours as you increment the start index
+* *creditCardTotalSpentInSlidingWindow*: The total sum of all transaction amounts for the given credit card in the past 24 hours as you increment the start index
 * *startCreditCardSlidingWindowIndex*: Start index to the transaction of the given credit card which marks the first transaction in the past 24 hours
 
 As new transactions come in, it would be one of the two following cases :
@@ -63,3 +63,5 @@ Finally, creditCardTotalSpentInSlidingWindow = creditCardTotalSpentInSlidingWind
 
 ### Design Overview
 
+UML Diagram of Classes and relationships
+![UML Diagram](https://github.com/sharmisnair/CreditCardsVerifier/blob/master/src/main/java/CreditCardsVerifierUMLDiagram.png)
