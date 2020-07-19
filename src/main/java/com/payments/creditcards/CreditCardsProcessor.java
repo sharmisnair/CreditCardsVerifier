@@ -2,17 +2,16 @@ package com.payments.creditcards;
 
 import com.payments.io.CsvProcessor;
 
+import com.payments.io.Logger;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-public class CreditCardsProcessor implements CsvProcessor {
+public class CreditCardsProcessor implements CsvProcessor, Logger {
 
   private final Double creditCardThreshold;
 
@@ -39,7 +38,7 @@ public class CreditCardsProcessor implements CsvProcessor {
 
     if (creditCardTxnDetails.length != 3) {
 
-      System.err.println("Could not process the credit card txn due to lack of information: "
+      Logger.printErrorCommandLine("Could not process the credit card txn due to lack of information: "
           + Arrays.toString(creditCardTxnDetails));
       return;
     }
@@ -55,7 +54,7 @@ public class CreditCardsProcessor implements CsvProcessor {
       processCreditCardTxn(hash, timestamp, amount);
 
     } catch (Exception exception) {
-      System.err.println("Error parsing inputs for credit card txn :" + creditCardTxnString);
+      Logger.printErrorCommandLine("Error parsing inputs for credit card txn :" + creditCardTxnString);
       exception.printStackTrace();
     }
 
@@ -66,7 +65,7 @@ public class CreditCardsProcessor implements CsvProcessor {
     CreditCard creditCard = getCreditCard(hash, timestamp, amount);
 
     if (creditCard == null) {
-      System.err.println("Could not process the credit card txn: " +
+      Logger.printErrorCommandLine("Could not process the credit card txn: " +
           " Hash" + hash +
           ", timestamp: " + timestamp +
           ", amount: " + amount);
@@ -98,7 +97,7 @@ public class CreditCardsProcessor implements CsvProcessor {
       }
 
     } catch (NullPointerException | IndexOutOfBoundsException | DateTimeParseException exception) {
-      System.err.println("Error retrieving Credit Card:" + exception.getMessage());
+      Logger.printErrorCommandLine("Error retrieving Credit Card:" + exception.getMessage());
       exception.printStackTrace();
     }
 
@@ -124,5 +123,12 @@ public class CreditCardsProcessor implements CsvProcessor {
 
   public void processInputLine(String line) {
     processCreditCardTxnAllString(line, delimiter);
+  }
+
+  public void printFraudulentCreditCards(String filePath) {
+    processInputFile(filePath);
+    List<String> fraudulentCreditCardsList = getFraudulentCreditCardsHashList();
+    Logger.printCommandLine("\nLIST OF FRAUDULENT CREDIT CARDS HASH:");
+    Logger.printCommandLine(fraudulentCreditCardsList);
   }
 }

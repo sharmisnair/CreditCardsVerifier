@@ -1,13 +1,14 @@
 package com.payments;
 
 import com.payments.creditcards.CreditCardsProcessor;
+import com.payments.io.Logger;
 
-public class Main {
+public class Main implements Logger {
 
   public static void main(String[] args) {
 
     if (args.length != 2) {
-      System.err.println("Incorrect input args: " +
+      Logger.printErrorCommandLine("Incorrect input args: " +
           args.length +
           "\nEnter 2 arguments: threshold filePath");
       return;
@@ -17,10 +18,6 @@ public class Main {
     String filePath = args[1];
 
     CreditCardsProcessor creditCardsProcessor = new CreditCardsProcessor(threshold);
-
-    creditCardsProcessor.processInputFile(filePath);
-
-    System.out.println("\nLIST OF FRAUDULENT CREDIT CARDS HASH:");
-    creditCardsProcessor.getFraudulentCreditCardsHashList().forEach(System.out::println);
+    creditCardsProcessor.printFraudulentCreditCards(filePath);
   }
 }

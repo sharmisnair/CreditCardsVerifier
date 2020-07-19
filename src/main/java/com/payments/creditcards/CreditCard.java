@@ -1,8 +1,9 @@
 package com.payments.creditcards;
 
+import com.payments.io.Logger;
 import java.time.LocalDateTime;
 
-public class CreditCard {
+public class CreditCard implements Logger {
 
   private String CCHash;
   private CreditCardTxnHistory CCTxnHistory;
@@ -36,7 +37,7 @@ public class CreditCard {
           CCTxnHistory.isNewCreditCardTxnValid(timestamp, amount, creditCardThreshold);
 
     } catch (Exception exception) {
-      System.err.println("Error checking for credit card validity: " + exception.getMessage());
+      Logger.printErrorCommandLine("Error checking for credit card validity: " + exception.getMessage());
       exception.printStackTrace();
       return false;
     }

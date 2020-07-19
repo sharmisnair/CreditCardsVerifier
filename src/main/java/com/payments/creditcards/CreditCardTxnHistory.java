@@ -1,12 +1,13 @@
 package com.payments.creditcards;
 
+import com.payments.io.Logger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CreditCardTxnHistory extends CreditCardTxnHistorySlider {
+public class CreditCardTxnHistory extends CreditCardTxnHistorySlider implements Logger {
 
   private List<CreditCardTxn> creditCardTxnList;
 
@@ -27,10 +28,10 @@ public class CreditCardTxnHistory extends CreditCardTxnHistorySlider {
       creditCardTxnList.add(newTxn);
       updateCreditCardSlidingWindow(getStartCreditCardTxn(), newTxn);
     } catch (NullPointerException exception) {
-      System.err.println("Error adding transaction to Credit Card:" + exception.getMessage());
+      Logger.printErrorCommandLine("Error adding transaction to Credit Card:" + exception.getMessage());
       exception.printStackTrace();
     } catch (Exception exception) {
-      System.err.println("Error adding transaction to Credit Card:" + exception.getMessage());
+      Logger.printErrorCommandLine("Error adding transaction to Credit Card:" + exception.getMessage());
       exception.printStackTrace();
     }
   }
@@ -46,7 +47,7 @@ public class CreditCardTxnHistory extends CreditCardTxnHistorySlider {
       return creditCardTxnList.get(getStartCreditCardSlidingWindowIndex());
 
     } catch (IndexOutOfBoundsException e) {
-      System.err.println(e.getMessage());
+      Logger.printErrorCommandLine(e.getMessage());
       e.printStackTrace();
       return null;
     }
@@ -61,7 +62,7 @@ public class CreditCardTxnHistory extends CreditCardTxnHistorySlider {
       return isAmountInThreshold(newCreditCardTotalSpend, creditCardThreshold);
 
     } catch (Exception e) {
-      System.err.println("Error checking new credit card txn.");
+      Logger.printErrorCommandLine("Error checking new credit card txn.");
       e.printStackTrace();
       return false;
     }
