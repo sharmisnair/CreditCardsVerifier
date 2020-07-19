@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface CsvProcessor {
 
-  public static String delimitator = ",";
+  public static String delimiter = ",";
 
   default void processInputFile(String inputFilePath) {
     List<String[]> inputList = null;

@@ -19,7 +19,6 @@ public abstract class CreditCardTxnHistorySlider implements CreditCardTxnHistory
     return getCreditCardTotalSpentInSlidingWindow() + amount;
   }
 
-  public abstract void updateCreditCardSlidingWindow(CreditCardTxn startTxn, CreditCardTxn newTxn)
-      throws Exception;
+  public abstract void updateCreditCardSlidingWindow(CreditCardTxn startTxn, CreditCardTxn newTxn);
 
 }

@@ -54,66 +54,139 @@ public class CreditCardTxnHistory extends CreditCardTxnHistorySlider {
 
   public boolean isNewCreditCardTxnValid(LocalDateTime timestamp, Double amount,
       Double creditCardThreshold) {
-    Double newCreditCardTotalSpend;
 
     try {
+      Double newCreditCardTotalSpend = findNewTotalSpendInWindow(timestamp, amount);
 
-      if (isNewCreditCard() ||
-          isRangeInSlidingWindow(getStartCreditCardTxn().getCCTimestamp(), timestamp)) {
-
-        newCreditCardTotalSpend = sumAmountInWindow(amount);
-
-      } else {
-        newCreditCardTotalSpend =
-            sumAmountInWindow(amount) - getStartCreditCardTxn().getCCAmountSpent();
-      }
       return isAmountInThreshold(newCreditCardTotalSpend, creditCardThreshold);
 
-    } catch (IndexOutOfBoundsException | NullPointerException exception) {
-      System.err.println("Error adding transaction to Credit Card:" + exception.getMessage());
-      exception.printStackTrace();
+    } catch (Exception e) {
+      System.err.println("Error checking new credit card txn.");
+      e.printStackTrace();
       return false;
     }
+
   }
 
   private boolean isAmountInThreshold(Double amount, Double creditCardThreshold) {
     return amount <= creditCardThreshold;
   }
 
-  public void updateCreditCardSlidingWindow(CreditCardTxn startTxn, CreditCardTxn newTxn)
-      throws Exception {
+  /*
+  Core Algorithm for sliding window technique to find the new starting Index of window:
+  As new transactions come in, it would be one of the two following cases :
+  #### Case 1: Timestamp is within the 24 hours of the timestamp of starting transaction
+  * No change to start index (aka startCreditCardSlidingWindowIndex)
+  * creditCardTotalSpentInSlidingWindow = creditCardTotalSpentInSlidingWindow + amount in transaction
 
-    // First transaction in card
+  #### Case 2: Timestamp is past 24 hours of the timestamp of starting transaction
+  Move through the CreditCardTxnList linked list and update below until we find the starting transaction
+  * Increment startCreditCardSlidingWindowIndex until we find the transaction marking the starting transaction in the past 24 hours window
+  * creditCardTotalSpentInSlidingWindow = creditCardTotalSpentInSlidingWindow + amount in transaction
+  */
+
+  public Integer findNewStartIndex(CreditCardTxn startTxn, CreditCardTxn newTxn) throws Exception {
+
+    Integer startIdx = getStartCreditCardSlidingWindowIndex();
+
     if (isNewCreditCard()) {
-      setStartCreditCardSlidingWindowIndex(getStartCreditCardSlidingWindowIndex() + 1);
-
+      startIdx = startIdx + 1;
+      return startIdx;
     } else {
+
+      //If new transaction in window, No changes to start index
+      if (isRangeInSlidingWindow(startTxn.getCCTimestamp(), newTxn.getCCTimestamp())) {
+        return startIdx;
+      }
 
       // If new transaction moves the sliding window, update the start index and deduct the amount
       // Do this until we find the new starting transaction in the sliding window range
-      Integer curIdx = getStartCreditCardSlidingWindowIndex();
-      CreditCardTxn curTxn = startTxn;
+      Integer curIdx = startIdx;
 
-      while (curTxn != newTxn && !isRangeInSlidingWindow(curTxn.getCCTimestamp(),
-          newTxn.getCCTimestamp())) {
+      while (curIdx < getCreditCardTxnList().size()) {
 
-        setCreditCardTotalSpentInSlidingWindow(
-            getCreditCardTotalSpentInSlidingWindow() - curTxn.getCCAmountSpent());
-
-        setStartCreditCardSlidingWindowIndex(curIdx + 1);
-
-        curIdx++;
-        try {
-          curTxn = getCreditCardTxnList().get(curIdx);
-        } catch (IndexOutOfBoundsException e) {
-          throw new Exception(
-              "Error encountered in updating sliding window: Reached end of the transaction list");
+        // Not in range, update start index
+        if (isRangeInSlidingWindow(getCreditCardTxnList().get(curIdx).getCCTimestamp(),
+            newTxn.getCCTimestamp())) {
+          startIdx = curIdx;
+          break;
         }
+        curIdx++;
+      }
+
+      // Reached end of CreditCardTxnList linked list and none in the time window range
+      // so the new transaction that is not yet added to list will be new start index
+      if (curIdx.equals(getCreditCardTxnList().size())) {
+
+        startIdx = getCreditCardTxnList().size();
       }
     }
+    return startIdx;
+  }
 
-    // New transaction amount is included in the Sliding Window
-    setCreditCardTotalSpentInSlidingWindow(
-        getCreditCardTotalSpentInSlidingWindow() + newTxn.getCCAmountSpent());
+  /*
+   * When a new transaction with timestamp/amount is being added, calculate the new total spend
+   */
+  public Double findNewTotalSpendInWindow(LocalDateTime timestamp, Double amount) throws Exception {
+
+    Double newCreditCardTotalSpend;
+
+    if (isNewCreditCard() ||
+        isRangeInSlidingWindow(getStartCreditCardTxn().getCCTimestamp(), timestamp)) {
+
+      newCreditCardTotalSpend = sumAmountInWindow(amount);
+
+    } else {
+
+      CreditCardTxn startTxn = getStartCreditCardTxn();
+      CreditCardTxn newTxn = new CreditCardTxn(timestamp, amount);
+      Integer newStartIdx = findNewStartIndex(startTxn, newTxn);
+
+      Integer curIdx = getStartCreditCardSlidingWindowIndex();
+      newCreditCardTotalSpend = getCreditCardTotalSpentInSlidingWindow();
+      CreditCardTxn curTxn = startTxn;
+
+      while (curIdx < creditCardTxnList.size() &&
+          curIdx <= newStartIdx) {
+        newCreditCardTotalSpend = newCreditCardTotalSpend - curTxn.getCCAmountSpent();
+        curIdx++;
+      }
+      newCreditCardTotalSpend = newCreditCardTotalSpend + amount;
+    }
+
+    return newCreditCardTotalSpend;
+  }
+
+  public void updateCreditCardSlidingWindow(CreditCardTxn startTxn, CreditCardTxn newTxn) {
+
+    try {
+      Integer newStartIdx = findNewStartIndex(startTxn, newTxn);
+
+      Double newAmount = getCreditCardTotalSpentInSlidingWindow() + newTxn.getCCAmountSpent();
+      Integer curIdx = getStartCreditCardSlidingWindowIndex();
+
+      // If no changes to starting index of window, just sum the new txn amount
+      if (curIdx.equals(newStartIdx)) {
+        setCreditCardTotalSpentInSlidingWindow(newAmount);
+        return;
+      }
+
+      if (!isNewCreditCard()) {
+        // Loop through transactions in the list that are no longer in sliding window and deduct amount
+        while (curIdx < getCreditCardTxnList().size() &&
+            curIdx < newStartIdx) {
+
+          CreditCardTxn curTxn = creditCardTxnList.get(curIdx);
+          newAmount = newAmount - curTxn.getCCAmountSpent();
+          curIdx++;
+
+        }
+      }
+
+      setCreditCardTotalSpentInSlidingWindow(newAmount);
+      setStartCreditCardSlidingWindowIndex(newStartIdx);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 }

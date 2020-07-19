@@ -35,7 +35,7 @@ public class CreditCard {
       return isCreditCardValid() &&
           CCTxnHistory.isNewCreditCardTxnValid(timestamp, amount, creditCardThreshold);
 
-    } catch (NullPointerException exception) {
+    } catch (Exception exception) {
       System.err.println("Error checking for credit card validity: " + exception.getMessage());
       exception.printStackTrace();
       return false;

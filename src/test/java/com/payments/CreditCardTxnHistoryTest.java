@@ -181,12 +181,16 @@ public class CreditCardTxnHistoryTest {
     CreditCardTxn newTxn = new CreditCardTxn(timestamp2, amount);
     CreditCardTxnHistory txnHistory = new CreditCardTxnHistory();
 
-    txnHistory.setStartCreditCardSlidingWindowIndex(1);
+    List<CreditCardTxn> txnList = new ArrayList<>();
+    txnList.add(startTxn);
+    txnList.add(newTxn);
+    txnHistory.setCreditCardTxnList(txnList);
+    txnHistory.setStartCreditCardSlidingWindowIndex(0);
     txnHistory.setCreditCardTotalSpentInSlidingWindow(amount);
 
     txnHistory.updateCreditCardSlidingWindow(startTxn, newTxn);
 
-    assertThat(txnHistory.getStartCreditCardSlidingWindowIndex()).isEqualTo(2);
+    assertThat(txnHistory.getStartCreditCardSlidingWindowIndex()).isEqualTo(1);
     assertThat(txnHistory.getCreditCardTotalSpentInSlidingWindow()).isEqualTo(10);
   }
 
@@ -223,33 +227,5 @@ public class CreditCardTxnHistoryTest {
 
     assertThat(txnHistory.getStartCreditCardSlidingWindowIndex()).isEqualTo(2);
     assertThat(txnHistory.getCreditCardTotalSpentInSlidingWindow()).isEqualTo(2.0);
-  }
-
-  @Test
-  public void updateCreditCardSlidingWindow_testExistingCardException() {
-
-    LocalDateTime timestamp1 = LocalDateTime.parse("2014-04-28T13:15:54",
-        DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-    LocalDateTime timestamp2 = LocalDateTime.parse("2014-04-29T20:15:54",
-        DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-
-    Double amount1 = 10.0;
-    Double amount2 = 5.0;
-
-    CreditCardTxn startTxn = new CreditCardTxn(timestamp1, amount1);
-    CreditCardTxn newTxn = new CreditCardTxn(timestamp2, amount2);
-
-    CreditCardTxnHistory txnHistory = new CreditCardTxnHistory();
-    List<CreditCardTxn> txnList = new ArrayList<>();
-    txnList.add(startTxn);
-    txnList.add(newTxn);
-    txnHistory.setCreditCardTxnList(txnList);
-
-    txnHistory.setStartCreditCardSlidingWindowIndex(1);
-    txnHistory.setCreditCardTotalSpentInSlidingWindow(15.0);
-
-    assertThatExceptionOfType(Exception.class)
-        .isThrownBy(() -> txnHistory.updateCreditCardSlidingWindow(startTxn, newTxn))
-        .withMessage("Error encountered in updating sliding window: Reached end of the transaction list");
   }
 }

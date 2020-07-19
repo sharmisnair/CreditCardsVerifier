@@ -37,9 +37,9 @@ public class CreditCardsProcessor implements CsvProcessor {
     return creditCardsHashSet;
   }
 
-  public void processCreditCardTxnAllString(String creditCardTxnString, String delimitator) {
+  public void processCreditCardTxnAllString(String creditCardTxnString, String delimiter) {
 
-    String[] creditCardTxnDetails = creditCardTxnString.split(delimitator);
+    String[] creditCardTxnDetails = creditCardTxnString.split(delimiter);
 
     if (creditCardTxnDetails.length != 3) {
 
@@ -78,6 +78,7 @@ public class CreditCardsProcessor implements CsvProcessor {
     }
 
     if (!creditCard.isCreditCardTxnValid(timestamp, amount, creditCardThreshold)) {
+
       updCreditCardAsInvalid(creditCard);
     } else {
       // Add a new credit card transaction
@@ -127,6 +128,6 @@ public class CreditCardsProcessor implements CsvProcessor {
   }
 
   public void processInputLine(String line) {
-    processCreditCardTxnAllString(line, delimitator);
+    processCreditCardTxnAllString(line, delimiter);
   }
 }
