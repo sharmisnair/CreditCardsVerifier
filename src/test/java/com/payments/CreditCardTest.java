@@ -58,13 +58,13 @@ public class CreditCardTest {
 
     cc.setCreditCardInvalid();
 
-    assertThat(cc.isCreditCardValid()).isEqualTo(false);
+    assertThat(cc.isCreditCardFraudulent()).isEqualTo(false);
   }
 
   @Test
   public void setCreditCardInvalid_testValid() {
     CreditCard cc = new CreditCard("10d7ce2f43e35fa57d1bbf8b1e2");
 
-    assertThat(cc.isCreditCardValid()).isEqualTo(true);
+    assertThat(cc.isCreditCardFraudulent()).isEqualTo(true);
   }
 }

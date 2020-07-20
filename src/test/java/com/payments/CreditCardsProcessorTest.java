@@ -21,7 +21,7 @@ public class CreditCardsProcessorTest {
     processor.processCreditCardTxn(hash, timestamp, amount);
 
     assertThat(processor.getFraudulentCreditCardsHashList()).isEmpty();
-    assertThat(processor.getCreditCardFromHash(hash).getCCHash()).isEqualTo(hash);
+    assertThat(processor.getCreditCardFromHash(hash).getCcHash()).isEqualTo(hash);
   }
 
   @Test
@@ -35,8 +35,8 @@ public class CreditCardsProcessorTest {
     CreditCardsProcessor processor = new CreditCardsProcessor(threshold);
     CreditCard cc = processor.getCreditCard(hash, timestamp, amount);
     assertThat(processor.getFraudulentCreditCardsHashList()).isEmpty();
-    assertThat(processor.getCreditCardFromHash(hash).getCCHash()).isEqualTo(hash);
-    assertThat(cc.getCCHash()).isEqualTo(hash);
+    assertThat(processor.getCreditCardFromHash(hash).getCcHash()).isEqualTo(hash);
+    assertThat(cc.getCcHash()).isEqualTo(hash);
   }
 
   @Test
@@ -53,8 +53,8 @@ public class CreditCardsProcessorTest {
 
     CreditCard cc = processor.getCreditCard(hash, timestamp, amount);
     assertThat(processor.getFraudulentCreditCardsHashList()).isEmpty();
-    assertThat(processor.getCreditCardFromHash(hash).getCCHash()).isEqualTo(hash);
-    assertThat(cc.getCCHash()).isEqualTo(hash);
+    assertThat(processor.getCreditCardFromHash(hash).getCcHash()).isEqualTo(hash);
+    assertThat(cc.getCcHash()).isEqualTo(hash);
     assertThat(cc).isEqualTo(creditCard);
   }
 
@@ -216,7 +216,7 @@ public class CreditCardsProcessorTest {
 
     System.out.println("Test1: Correct CSV format.");
     creditCardsProcessor.processCreditCardTxnAllString(line1,delimitator);
-    assertThat(creditCardsProcessor.getCreditCardFromHash("10d7ce2f43e35fa57d1bbf8b1e3").isCreditCardValid()).isEqualTo(true);
+    assertThat(creditCardsProcessor.getCreditCardFromHash("10d7ce2f43e35fa57d1bbf8b1e3").isCreditCardFraudulent()).isEqualTo(true);
 
     System.out.println("Test2: Incorrect CSV format. Expecting error message.");
     creditCardsProcessor.processCreditCardTxnAllString(line2,delimitator);

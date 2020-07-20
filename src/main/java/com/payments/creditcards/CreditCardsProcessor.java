@@ -105,7 +105,7 @@ public class CreditCardsProcessor implements CsvProcessor, Logger {
   }
 
   public void updateProcessorNewCreditCard(CreditCard creditCard) {
-    String hash = creditCard.getCCHash();
+    String hash = creditCard.getCcHash();
     creditCardsMap.put(hash, creditCard);
   }
 
@@ -115,10 +115,10 @@ public class CreditCardsProcessor implements CsvProcessor, Logger {
 
   public void updCreditCardAsInvalid(CreditCard creditCard) {
 
-    if (!creditCard.isCreditCardValid()) return;
+    if (!creditCard.isCreditCardFraudulent()) return;
     
     creditCard.setCreditCardInvalid();
-    fraudulentCreditCardsHashList.add(creditCard.getCCHash());
+    fraudulentCreditCardsHashList.add(creditCard.getCcHash());
   }
 
   public void processInputLine(String line) {

@@ -5,36 +5,36 @@ import java.time.LocalDateTime;
 
 public class CreditCard implements Logger {
 
-  private String CCHash;
-  private CreditCardTxnHistory CCTxnHistory;
-  private boolean CCValid;
+  private String ccHash;
+  private CreditCardTxnHistory ccTxnHistory;
+  private boolean ccFraudulent;
 
   public CreditCard(String hash) {
-    CCHash = hash;
-    CCTxnHistory = new CreditCardTxnHistory();
-    CCValid = true;
+    ccHash = hash;
+    ccTxnHistory = new CreditCardTxnHistory();
+    ccFraudulent = true;
   }
 
-  public String getCCHash() {
-    return CCHash;
+  public String getCcHash() {
+    return ccHash;
   }
 
-  public CreditCardTxnHistory getCCTxnHistory() { return CCTxnHistory; }
+  public CreditCardTxnHistory getCcTxnHistory() { return ccTxnHistory; }
 
-  public boolean isCreditCardValid() { return CCValid; }
+  public boolean isCreditCardFraudulent() { return ccFraudulent; }
 
-  public void setCreditCardInvalid() { this.CCValid = false; }
+  public void setCreditCardInvalid() { this.ccFraudulent = false; }
 
   public void addNewCreditCardTxn(LocalDateTime timestamp, Double amount) {
-    CCTxnHistory.addCreditCardTxn(new CreditCardTxn(timestamp, amount));
+    ccTxnHistory.addCreditCardTxn(new CreditCardTxn(timestamp, amount));
   }
 
   public boolean isCreditCardTxnValid(LocalDateTime timestamp, Double amount,
       Double creditCardThreshold) {
     try {
 
-      return isCreditCardValid() &&
-          CCTxnHistory.isNewCreditCardTxnValid(timestamp, amount, creditCardThreshold);
+      return isCreditCardFraudulent() &&
+          ccTxnHistory.isNewCreditCardTxnValid(timestamp, amount, creditCardThreshold);
 
     } catch (Exception exception) {
       Logger.printErrorCommandLine("Error checking for credit card validity: " + exception.getMessage());
