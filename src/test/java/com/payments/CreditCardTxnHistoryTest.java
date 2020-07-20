@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import com.payments.creditcards.CreditCardTxn;
 import com.payments.creditcards.CreditCardTxnHistory;
+import com.payments.creditcards.CreditCardTxnHistorySlider;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -61,8 +62,8 @@ public class CreditCardTxnHistoryTest {
     // Mock adding a starting txn in window
     CreditCardTxn txn = new CreditCardTxn(timestamp1, 5.0);
     txnHistory.getCreditCardTxnList().add(txn);
-    txnHistory.setCreditCardTotalSpentInSlidingWindow(amount1);
-    txnHistory.setStartCreditCardSlidingWindowIndex(0);
+    txnHistory.getCreditCardTxnHistorySlider().setCreditCardTotalSpentInSlidingWindow(amount1);
+    txnHistory.getCreditCardTxnHistorySlider().setStartCreditCardSlidingWindowIndex(0);
 
     boolean response = txnHistory.isNewCreditCardTxnValid(timestamp2, amount2, threshold);
     assertThat(response).isEqualTo(true);
@@ -83,8 +84,8 @@ public class CreditCardTxnHistoryTest {
     // Mock adding a starting txn in window
     CreditCardTxn txn = new CreditCardTxn(timestamp1, 5.0);
     txnHistory.getCreditCardTxnList().add(txn);
-    txnHistory.setCreditCardTotalSpentInSlidingWindow(amount1);
-    txnHistory.setStartCreditCardSlidingWindowIndex(0);
+    txnHistory.getCreditCardTxnHistorySlider().setCreditCardTotalSpentInSlidingWindow(amount1);
+    txnHistory.getCreditCardTxnHistorySlider().setStartCreditCardSlidingWindowIndex(0);
 
     boolean response = txnHistory.isNewCreditCardTxnValid(timestamp2, amount2, threshold);
     assertThat(response).isEqualTo(false);
@@ -105,8 +106,8 @@ public class CreditCardTxnHistoryTest {
     // Mock adding a starting txn in window
     CreditCardTxn txn = new CreditCardTxn(timestamp1, amount1);
     txnHistory.getCreditCardTxnList().add(txn);
-    txnHistory.setCreditCardTotalSpentInSlidingWindow(amount1);
-    txnHistory.setStartCreditCardSlidingWindowIndex(0);
+    txnHistory.getCreditCardTxnHistorySlider().setCreditCardTotalSpentInSlidingWindow(amount1);
+    txnHistory.getCreditCardTxnHistorySlider().setStartCreditCardSlidingWindowIndex(0);
 
     boolean response = txnHistory.isNewCreditCardTxnValid(timestamp2, amount2, threshold);
     assertThat(response).isEqualTo(true);
@@ -127,8 +128,8 @@ public class CreditCardTxnHistoryTest {
     // Mock adding a starting txn in window
     CreditCardTxn txn = new CreditCardTxn(timestamp1, amount1);
     txnHistory.getCreditCardTxnList().add(txn);
-    txnHistory.setCreditCardTotalSpentInSlidingWindow(amount1);
-    txnHistory.setStartCreditCardSlidingWindowIndex(0);
+    txnHistory.getCreditCardTxnHistorySlider().setCreditCardTotalSpentInSlidingWindow(amount1);
+    txnHistory.getCreditCardTxnHistorySlider().setStartCreditCardSlidingWindowIndex(0);
 
     boolean response = txnHistory.isNewCreditCardTxnValid(timestamp2, amount2, threshold);
     assertThat(response).isEqualTo(false);
@@ -143,8 +144,8 @@ public class CreditCardTxnHistoryTest {
     CreditCardTxnHistory txnHistory = new CreditCardTxnHistory();
 
     txnHistory.updateCreditCardSlidingWindow(null, newTxn);
-    assertThat(txnHistory.getStartCreditCardSlidingWindowIndex()).isEqualTo(0);
-    assertThat(txnHistory.getCreditCardTotalSpentInSlidingWindow()).isEqualTo(newTxn.getCCAmountSpent());
+    assertThat(txnHistory.getCreditCardTxnHistorySlider().getStartCreditCardSlidingWindowIndex()).isEqualTo(0);
+    assertThat(txnHistory.getCreditCardTxnHistorySlider().getCreditCardTotalSpentInSlidingWindow()).isEqualTo(newTxn.getCCAmountSpent());
   }
 
   @Test
@@ -158,14 +159,18 @@ public class CreditCardTxnHistoryTest {
     CreditCardTxn startTxn = new CreditCardTxn(timestamp1, amount);
     CreditCardTxn newTxn = new CreditCardTxn(timestamp2, amount);
     CreditCardTxnHistory txnHistory = new CreditCardTxnHistory();
+    List<CreditCardTxn> txnList = new ArrayList<>();
+    txnList.add(startTxn);
+    txnList.add(newTxn);
+    txnHistory.setCreditCardTxnList(txnList);
 
-    txnHistory.setStartCreditCardSlidingWindowIndex(1);
-    txnHistory.setCreditCardTotalSpentInSlidingWindow(amount);
+    txnHistory.getCreditCardTxnHistorySlider().setStartCreditCardSlidingWindowIndex(0);
+    txnHistory.getCreditCardTxnHistorySlider().setCreditCardTotalSpentInSlidingWindow(amount);
 
     txnHistory.updateCreditCardSlidingWindow(startTxn, newTxn);
 
-    assertThat(txnHistory.getStartCreditCardSlidingWindowIndex()).isEqualTo(1);
-    assertThat(txnHistory.getCreditCardTotalSpentInSlidingWindow()).isEqualTo(20);
+    assertThat(txnHistory.getCreditCardTxnHistorySlider().getStartCreditCardSlidingWindowIndex()).isEqualTo(0);
+    assertThat(txnHistory.getCreditCardTxnHistorySlider().getCreditCardTotalSpentInSlidingWindow()).isEqualTo(20);
   }
 
   @Test
@@ -182,16 +187,17 @@ public class CreditCardTxnHistoryTest {
     CreditCardTxnHistory txnHistory = new CreditCardTxnHistory();
 
     List<CreditCardTxn> txnList = new ArrayList<>();
+    CreditCardTxnHistorySlider slider = txnHistory.getCreditCardTxnHistorySlider();
     txnList.add(startTxn);
     txnList.add(newTxn);
     txnHistory.setCreditCardTxnList(txnList);
-    txnHistory.setStartCreditCardSlidingWindowIndex(0);
-    txnHistory.setCreditCardTotalSpentInSlidingWindow(amount);
+    slider.setStartCreditCardSlidingWindowIndex(0);
+    slider.setCreditCardTotalSpentInSlidingWindow(amount);
 
     txnHistory.updateCreditCardSlidingWindow(startTxn, newTxn);
 
-    assertThat(txnHistory.getStartCreditCardSlidingWindowIndex()).isEqualTo(1);
-    assertThat(txnHistory.getCreditCardTotalSpentInSlidingWindow()).isEqualTo(10);
+    assertThat(slider.getStartCreditCardSlidingWindowIndex()).isEqualTo(1);
+    assertThat(slider.getCreditCardTotalSpentInSlidingWindow()).isEqualTo(10);
   }
 
   @Test
@@ -220,12 +226,12 @@ public class CreditCardTxnHistoryTest {
     txnList.add(newTxn);
     txnHistory.setCreditCardTxnList(txnList);
 
-    txnHistory.setStartCreditCardSlidingWindowIndex(0);
-    txnHistory.setCreditCardTotalSpentInSlidingWindow(15.0);
+    txnHistory.getCreditCardTxnHistorySlider().setStartCreditCardSlidingWindowIndex(0);
+    txnHistory.getCreditCardTxnHistorySlider().setCreditCardTotalSpentInSlidingWindow(15.0);
 
     txnHistory.updateCreditCardSlidingWindow(startTxn, newTxn);
 
-    assertThat(txnHistory.getStartCreditCardSlidingWindowIndex()).isEqualTo(2);
-    assertThat(txnHistory.getCreditCardTotalSpentInSlidingWindow()).isEqualTo(2.0);
+    assertThat(txnHistory.getCreditCardTxnHistorySlider().getStartCreditCardSlidingWindowIndex()).isEqualTo(2);
+    assertThat(txnHistory.getCreditCardTxnHistorySlider().getCreditCardTotalSpentInSlidingWindow()).isEqualTo(2.0);
   }
 }

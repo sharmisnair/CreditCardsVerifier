@@ -1,6 +1,6 @@
 package com.payments.creditcards;
 
-public abstract class CreditCardTxnHistorySlider implements CreditCardTxnHistorySlidingWindow {
+public class CreditCardTxnHistorySlider implements CreditCardTxnHistorySlidingWindow {
 
   private static final Integer NEW_CARD = -1;
   private Double creditCardTotalSpentInSlidingWindow = 0.0;
@@ -15,10 +15,8 @@ public abstract class CreditCardTxnHistorySlider implements CreditCardTxnHistory
 
   public void setStartCreditCardSlidingWindowIndex(Integer index) { startCreditCardSlidingWindowIndex = index; }
 
-  public Double sumAmountInWindow(Double amount) {
-    return getCreditCardTotalSpentInSlidingWindow() + amount;
+  public void setCreditCardSlidingWindow(Integer newStartIdx, Double newTotalSpent) {
+    creditCardTotalSpentInSlidingWindow = newTotalSpent;
+    startCreditCardSlidingWindowIndex = newStartIdx;
   }
-
-  public abstract void updateCreditCardSlidingWindow(CreditCardTxn startTxn, CreditCardTxn newTxn);
-
 }

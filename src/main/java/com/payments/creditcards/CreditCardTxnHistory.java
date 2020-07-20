@@ -7,12 +7,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CreditCardTxnHistory extends CreditCardTxnHistorySlider implements Logger {
+public class CreditCardTxnHistory implements Logger {
 
   private List<CreditCardTxn> creditCardTxnList;
+  CreditCardTxnHistorySlider txnHistorySlider;
 
   public CreditCardTxnHistory() {
     creditCardTxnList = new ArrayList<CreditCardTxn>();
+    txnHistorySlider = new CreditCardTxnHistorySlider();
   }
 
   public List<CreditCardTxn> getCreditCardTxnList() {
@@ -23,28 +25,35 @@ public class CreditCardTxnHistory extends CreditCardTxnHistorySlider implements 
     creditCardTxnList = source.stream().collect(Collectors.toList());
   }
 
+  public CreditCardTxnHistorySlider getCreditCardTxnHistorySlider() {
+    return txnHistorySlider;
+  }
+
   public void addCreditCardTxn(CreditCardTxn newTxn) {
     try {
       creditCardTxnList.add(newTxn);
       updateCreditCardSlidingWindow(getStartCreditCardTxn(), newTxn);
+
     } catch (NullPointerException exception) {
-      Logger.printErrorCommandLine("Error adding transaction to Credit Card:" + exception.getMessage());
+      Logger.printErrorCommandLine(
+          "Error adding transaction to Credit Card:" + exception.getMessage());
       exception.printStackTrace();
     } catch (Exception exception) {
-      Logger.printErrorCommandLine("Error adding transaction to Credit Card:" + exception.getMessage());
+      Logger.printErrorCommandLine(
+          "Error adding transaction to Credit Card:" + exception.getMessage());
       exception.printStackTrace();
     }
   }
 
   public CreditCardTxn getStartCreditCardTxn() {
 
-    if (isNewCreditCard()) {
+    if (txnHistorySlider.isNewCreditCard()) {
       return null;
     }
 
     try {
 
-      return creditCardTxnList.get(getStartCreditCardSlidingWindowIndex());
+      return creditCardTxnList.get(txnHistorySlider.getStartCreditCardSlidingWindowIndex());
 
     } catch (IndexOutOfBoundsException e) {
       Logger.printErrorCommandLine(e.getMessage());
@@ -57,7 +66,9 @@ public class CreditCardTxnHistory extends CreditCardTxnHistorySlider implements 
       Double creditCardThreshold) {
 
     try {
-      Double newCreditCardTotalSpend = findNewTotalSpendInWindow(timestamp, amount);
+
+      Integer newStartIdx = findNewStartIndex(getStartCreditCardTxn(), new CreditCardTxn(timestamp, amount));
+      Double newCreditCardTotalSpend = findNewTotalSpendInWindow(timestamp, amount, newStartIdx);
 
       return isAmountInThreshold(newCreditCardTotalSpend, creditCardThreshold);
 
@@ -86,17 +97,31 @@ public class CreditCardTxnHistory extends CreditCardTxnHistorySlider implements 
   * creditCardTotalSpentInSlidingWindow = creditCardTotalSpentInSlidingWindow + amount in transaction
   */
 
-  public Integer findNewStartIndex(CreditCardTxn startTxn, CreditCardTxn newTxn) throws Exception {
+  public void updateCreditCardSlidingWindow(CreditCardTxn startTxn, CreditCardTxn newTxn) {
+    try {
 
-    Integer startIdx = getStartCreditCardSlidingWindowIndex();
+      Integer newStartIdx = findNewStartIndex(startTxn, newTxn);
+      Double newAmount = findNewTotalSpendInWindow(newTxn.getCCTimestamp(),
+          newTxn.getCCAmountSpent(), newStartIdx);
+      txnHistorySlider.setCreditCardSlidingWindow(newStartIdx, newAmount);
 
-    if (isNewCreditCard()) {
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  private Integer findNewStartIndex(CreditCardTxn startTxn, CreditCardTxn newTxn) throws Exception {
+
+    Integer startIdx = txnHistorySlider.getStartCreditCardSlidingWindowIndex();
+
+    if (txnHistorySlider.isNewCreditCard()) {
       startIdx = startIdx + 1;
       return startIdx;
     } else {
 
       //If new transaction in window, No changes to start index
-      if (isRangeInSlidingWindow(startTxn.getCCTimestamp(), newTxn.getCCTimestamp())) {
+      if (txnHistorySlider
+          .isRangeInSlidingWindow(startTxn.getCCTimestamp(), newTxn.getCCTimestamp())) {
         return startIdx;
       }
 
@@ -107,8 +132,9 @@ public class CreditCardTxnHistory extends CreditCardTxnHistorySlider implements 
       while (curIdx < getCreditCardTxnList().size()) {
 
         // Not in range, update start index
-        if (isRangeInSlidingWindow(getCreditCardTxnList().get(curIdx).getCCTimestamp(),
-            newTxn.getCCTimestamp())) {
+        if (txnHistorySlider
+            .isRangeInSlidingWindow(getCreditCardTxnList().get(curIdx).getCCTimestamp(),
+                newTxn.getCCTimestamp())) {
           startIdx = curIdx;
           break;
         }
@@ -128,66 +154,32 @@ public class CreditCardTxnHistory extends CreditCardTxnHistorySlider implements 
   /*
    * When a new transaction with timestamp/amount is being added, calculate the new total spend
    */
-  public Double findNewTotalSpendInWindow(LocalDateTime timestamp, Double amount) throws Exception {
+  private Double findNewTotalSpendInWindow(LocalDateTime timestamp, Double amount,
+      Integer newStartIdx) throws Exception {
 
     Double newCreditCardTotalSpend;
 
-    if (isNewCreditCard() ||
-        isRangeInSlidingWindow(getStartCreditCardTxn().getCCTimestamp(), timestamp)) {
+    if (txnHistorySlider.isNewCreditCard() ||
+        txnHistorySlider.isRangeInSlidingWindow(getStartCreditCardTxn().getCCTimestamp(), timestamp)) {
 
-      newCreditCardTotalSpend = sumAmountInWindow(amount);
+      newCreditCardTotalSpend = txnHistorySlider.getCreditCardTotalSpentInSlidingWindow() + amount;
 
     } else {
 
-      CreditCardTxn startTxn = getStartCreditCardTxn();
-      CreditCardTxn newTxn = new CreditCardTxn(timestamp, amount);
-      Integer newStartIdx = findNewStartIndex(startTxn, newTxn);
-
-      Integer curIdx = getStartCreditCardSlidingWindowIndex();
-      newCreditCardTotalSpend = getCreditCardTotalSpentInSlidingWindow();
-      CreditCardTxn curTxn = startTxn;
+      Integer curIdx = txnHistorySlider.getStartCreditCardSlidingWindowIndex();
+      newCreditCardTotalSpend = txnHistorySlider.getCreditCardTotalSpentInSlidingWindow();
+      CreditCardTxn curTxn;
 
       while (curIdx < creditCardTxnList.size() &&
-          curIdx <= newStartIdx) {
+          curIdx != newStartIdx) {
+        curTxn = getCreditCardTxnList().get(curIdx);
         newCreditCardTotalSpend = newCreditCardTotalSpend - curTxn.getCCAmountSpent();
         curIdx++;
+
       }
       newCreditCardTotalSpend = newCreditCardTotalSpend + amount;
     }
 
     return newCreditCardTotalSpend;
-  }
-
-  public void updateCreditCardSlidingWindow(CreditCardTxn startTxn, CreditCardTxn newTxn) {
-
-    try {
-      Integer newStartIdx = findNewStartIndex(startTxn, newTxn);
-
-      Double newAmount = getCreditCardTotalSpentInSlidingWindow() + newTxn.getCCAmountSpent();
-      Integer curIdx = getStartCreditCardSlidingWindowIndex();
-
-      // If no changes to starting index of window, just sum the new txn amount
-      if (curIdx.equals(newStartIdx)) {
-        setCreditCardTotalSpentInSlidingWindow(newAmount);
-        return;
-      }
-
-      if (!isNewCreditCard()) {
-        // Loop through transactions in the list that are no longer in sliding window and deduct amount
-        while (curIdx < getCreditCardTxnList().size() &&
-            curIdx < newStartIdx) {
-
-          CreditCardTxn curTxn = creditCardTxnList.get(curIdx);
-          newAmount = newAmount - curTxn.getCCAmountSpent();
-          curIdx++;
-
-        }
-      }
-
-      setCreditCardTotalSpentInSlidingWindow(newAmount);
-      setStartCreditCardSlidingWindowIndex(newStartIdx);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
   }
 }
