@@ -11,9 +11,11 @@ public class CreditCardTxnHistory implements Logger {
 
   private List<CreditCardTxn> creditCardTxnList;
   CreditCardTxnHistorySlider txnHistorySlider;
+  CreditCardTxnHistorySlidingWindow txnHistorySlidingWindow;
 
   public CreditCardTxnHistory() {
     creditCardTxnList = new ArrayList<CreditCardTxn>();
+    txnHistorySlidingWindow = new CreditCardTxnHistorySlidingWindow();
     txnHistorySlider = new CreditCardTxnHistorySlider();
   }
 
@@ -120,7 +122,7 @@ public class CreditCardTxnHistory implements Logger {
     } else {
 
       //If new transaction in window, No changes to start index
-      if (txnHistorySlider
+      if (txnHistorySlidingWindow
           .isRangeInSlidingWindow(startTxn.getCCTimestamp(), newTxn.getCCTimestamp())) {
         return startIdx;
       }
@@ -132,7 +134,7 @@ public class CreditCardTxnHistory implements Logger {
       while (curIdx < getCreditCardTxnList().size()) {
 
         // Not in range, update start index
-        if (txnHistorySlider
+        if (txnHistorySlidingWindow
             .isRangeInSlidingWindow(getCreditCardTxnList().get(curIdx).getCCTimestamp(),
                 newTxn.getCCTimestamp())) {
           startIdx = curIdx;
@@ -160,7 +162,7 @@ public class CreditCardTxnHistory implements Logger {
     Double newCreditCardTotalSpend;
 
     if (txnHistorySlider.isNewCreditCard() ||
-        txnHistorySlider.isRangeInSlidingWindow(getStartCreditCardTxn().getCCTimestamp(), timestamp)) {
+        txnHistorySlidingWindow.isRangeInSlidingWindow(getStartCreditCardTxn().getCCTimestamp(), timestamp)) {
 
       newCreditCardTotalSpend = txnHistorySlider.getCreditCardTotalSpentInSlidingWindow() + amount;
 

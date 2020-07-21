@@ -1,6 +1,6 @@
 package com.payments.creditcards;
 
-public class CreditCardTxnHistorySlider implements CreditCardTxnHistorySlidingWindow {
+public class CreditCardTxnHistorySlider {
 
   private static final Integer NEW_CARD = -1;
   private Double creditCardTotalSpentInSlidingWindow = 0.0;
